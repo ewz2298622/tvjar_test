@@ -142,17 +142,35 @@ public class Xinsj extends Spider {
             String vod_play_from = TextUtils.join("$$$", playFroms);
 
             Element v_info_el = Jsoup.parse(content).select("[class=video-info]").get(0);
-            System.out.println(v_info_el);
+            // System.out.println(v_info_el);
             String vod_name = v_info_el.select("[class=page-title]").text();
-            String vod_pic = v_info_el.select("[class=lazyload]").attr("data-src");
+            String vod_pic = Jsoup.parse(content).select("[class=lazyload]").get(0).attr("data-src");
+            String type_name = v_info_el.select("[class=tag-link]").text();
+            String vod_year = "年份";
+            String vod_area = "地区";
+            String vod_remarks = "提示信息";
+            String vod_actor = "主演";
+            String vod_director = "导演";
+            String vod_content = "简介";
+
             info.put("vod_id", ids.get(0));
             info.put("vod_name", vod_name);
             info.put("vod_pic", vod_pic);
+            info.put("type_name", type_name);
+            info.put("vod_year", vod_year);
+            info.put("vod_area", vod_area);
+            info.put("vod_remarks", vod_remarks);
+            info.put("vod_actor", vod_actor);
+            info.put("vod_director", vod_director);
+            info.put("vod_content", vod_content);
 
             info.put("vod_play_from", vod_play_from);
             info.put("vod_play_url", vod_play_url);
-            System.out.println(info);
 
+            list_info.put(info);
+            result.put("list", list_info);
+
+            return result.toString();
         } catch (Exception e) {
             SpiderDebug.log(e);
         }
@@ -170,6 +188,17 @@ public class Xinsj extends Spider {
 
     public String playerContent(String flag, String id, List<String> vipFlags) {
         try {
+            String url = siteUrl + id;
+            String content = OkHttpUtil.string(url, getHeaders(url));
+            // System.out.println(content);
+            Element v_info_el = Jsoup.parse(content).select("[id=bfurl]").get(0);
+            String play_url = v_info_el.attr("href");
+            JSONObject result = new JSONObject();
+            result.put("parse", 0);
+            result.put("header", "");
+            result.put("playUrl", play_url);
+            result.put("url", id);
+            return result.toString();
 
         } catch (Exception e) {
             SpiderDebug.log(e);
