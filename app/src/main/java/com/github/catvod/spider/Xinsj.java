@@ -197,7 +197,7 @@ public class Xinsj extends Spider {
             result.put("parse", 0);
             result.put("header", "");
             result.put("playUrl", play_url);
-            result.put("url", id);
+            result.put("url", "");
             return result.toString();
 
         } catch (Exception e) {
