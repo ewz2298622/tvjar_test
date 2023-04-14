@@ -115,23 +115,44 @@ public class Xinsj extends Spider {
             Elements sourcesName_el = Jsoup.parse(content).select("[class=module-tab-content]")
                     .select("[class=module-tab-item tab-item]");
             ArrayList<String> playFroms = new ArrayList<String>();
+            Elements sourcesUrl_el = Jsoup.parse(content).select("[class=sort-item]");
+            // System.out.println(sourcesUrl_el);
 
-            ;
+            ArrayList<String> play_from_array = new ArrayList<String>();
+            for (int i = 0; i < sourcesUrl_el.size(); i++) {
+                Elements url_a = sourcesUrl_el.get(i).select("a");
 
+                ArrayList<String> arr = new ArrayList<String>();
+                for (int j = 0; j < url_a.size(); j++) {
+                    arr.add(url_a.get(j).select("span").text() + "$" + url_a.get(j).attr("href"));
+                }
+                String sources = TextUtils.join("#", arr);
+                play_from_array.add(sources);
+            }
+
+            String vod_play_url = TextUtils.join("$$$", play_from_array);
+            // System.out.println(vod_play_url);
             for (int i = 0; i < sourcesName_el.size(); i++) {
 
                 String playfrom = sourcesName_el.get(i).attr("data-dropdown-value");
-                String playfromNum = sourcesName_el.get(i).select("small").text();
-                int pNum = Integer.parseInt(playfromNum);
-                if (pNum == 1) {
-
-                }
-                System.out.println(playfromNum);
                 playFroms.add(playfrom);
 
             }
 
-            System.out.println(TextUtils.join("$$$", playFroms));
+            String vod_play_from = TextUtils.join("$$$", playFroms);
+
+            Element v_info_el = Jsoup.parse(content).select("[class=video-info]").get(0);
+            System.out.println(v_info_el);
+            String vod_name = v_info_el.select("[class=page-title]").text();
+            String vod_pic = v_info_el.select("[class=lazyload]").attr("data-src");
+            info.put("vod_id", ids.get(0));
+            info.put("vod_name", vod_name);
+            info.put("vod_pic", vod_pic);
+
+            info.put("vod_play_from", vod_play_from);
+            info.put("vod_play_url", vod_play_url);
+            System.out.println(info);
+
         } catch (Exception e) {
             SpiderDebug.log(e);
         }
