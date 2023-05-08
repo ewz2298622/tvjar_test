@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import android.text.TextUtils;
 
 import java.security.MessageDigest;
 
@@ -18,19 +19,11 @@ import com.github.catvod.crawler.SpiderDebug;
 public class Kunyu77 extends Spider {
     private static final String siteUrl = "https://api.kunyu77.com";
 
-    protected HashMap<String, String> getHeaders1(String t, String str) {
-        HashMap<String, String> headers = new HashMap<>();
-        headers.put("User-Agent", "Dalvik/2.1.0 (Linux; U; Android 11; M2012K11AC Build/RKQ1.200826.002)");
-        headers.put("t", t);
-        headers.put("TK", getMd5(str));
-        return headers;
-    }
-
-    protected HashMap<String, String> getHeaders(String t, String str) {
+    protected HashMap<String, String> getHeaders() {
         HashMap<String, String> headers = new HashMap<>();
         headers.put("User-Agent", "okhttp/3.12.0");
-        headers.put("t", t);
-        headers.put("TK", getMd5(str));
+        headers.put("Referer", "http://api.kunyu77.com");
+        headers.put("Host", "api.kunyu77.com");
         return headers;
     }
 
@@ -90,32 +83,15 @@ public class Kunyu77 extends Spider {
             JSONObject info = new JSONObject();
             JSONArray list = new JSONArray();
             JSONObject result = new JSONObject();
+            String url = "http://api.kunyu77.com/api.php/provide/videoDetail?devid=453CA5D864457C7DB4D0EAA93DE96E66&package=com.sevenVideo.app.android&version=1.8.7&ids="
+                    + ids.get(0);
+            String playurls = "http://api.kunyu77.com/api.php/provide/videoPlaylist?devid=453CA5D864457C7DB4D0EAA93DE96E66&package=com.sevenVideo.app.android&version=1.8.7&ids="
+                    + ids.get(0);
+            String videoInfo = OkHttpUtil.string(url, getHeaders());
+            String videolist = OkHttpUtil.string(playurls, getHeaders());
+            // System.out.println(videolist)
 
-            String t = String.valueOf(System.currentTimeMillis() / 1000);
-            String str3 = "XSpeUFjJ";
-            String str4 = "android7.1.22.0.4";
-            String str5 = "RMX1931com.sevenVideo.app.android010110002";
-            String str6 = "&pcode=010110002&version=2.0.4&devid=4ac3fe96a6133de96904b8d3c8cfe16d&package=com.sevenVideo.app.android&sys=android&sysver=7.1.2&brand=realme&model=RMX1931&sj=";
-            String str7 = "?ids=";
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("http://api.kunyu77.com/api.php/provide/videoDetail");
-            stringBuilder.append(str7);
-            stringBuilder.append((String) ids.get(0));
-            stringBuilder.append(str6);
-            stringBuilder.append(t);
-            StringBuilder stringBuilder3 = new StringBuilder();
-            stringBuilder3.append("/api.php/provide/videoDetailrealme4ac3fe96a6133de96904b8d3c8cfe16d");
-            stringBuilder3.append((String) ids.get(0));
-            stringBuilder3.append(str5);
-            stringBuilder3.append(t);
-            stringBuilder3.append(str4);
-            stringBuilder3.append(t);
-            stringBuilder3.append(str3);
-            JSONObject res_JsonObject = new JSONObject(
-                    OkHttpUtil.string("http://api.kunyu77.com/api.php/provide/videoDetail?ids=" + ids.get(0)
-                            + "&pcode=010110002&version=2.0.4&devid=4ac3fe96a6133de96904b8d3c8cfe16d&package=com.sevenVideo.app.android&sys=android&sysver=7.1.2&brand=realme&model=RMX1931&sj="
-                            + t, getHeaders1(t, stringBuilder3.toString())));
-
+            JSONObject res_JsonObject = new JSONObject(videoInfo);
             String vod_name = res_JsonObject.getJSONObject("data").getString("videoName");
             String vod_id = ids.get(0);
             String vod_year = res_JsonObject.getJSONObject("data").getString("year");
@@ -137,20 +113,8 @@ public class Kunyu77 extends Spider {
             info.put("vod_actor", vod_actor);
             info.put("vod_director", vod_director);
             info.put("vod_content", vod_content);
-
-            StringBuilder stringBuilder5 = new StringBuilder();
-            stringBuilder5.append("/api.php/provide/videoPlaylistrealme4ac3fe96a6133de96904b8d3c8cfe16d");
-            stringBuilder5.append((String) ids.get(0));
-            stringBuilder5.append("RMX1931com.sevenVideo.app.android010110002");
-            stringBuilder5.append(t);
-            stringBuilder5.append("android7.1.22.0.4");
-            stringBuilder5.append(t);
-            stringBuilder5.append("XSpeUFjJ");
-
-            JSONObject play_url_JsonObject = new JSONObject(
-                    OkHttpUtil.string("http://api.kunyu77.com/api.php/provide/videoPlaylist?ids=" + ids.get(0)
-                            + "&pcode=010110002&version=2.0.4&devid=4ac3fe96a6133de96904b8d3c8cfe16d&package=com.sevenVideo.app.android&sys=android&sysver=7.1.2&brand=realme&model=RMX1931&sj="
-                            + t, getHeaders1(t, stringBuilder5.toString())));
+            // System.out.println(info);
+            JSONObject play_url_JsonObject = new JSONObject(videolist);
             JSONArray play_url_JsonArray = play_url_JsonObject.getJSONObject("data").getJSONArray("episodes");
             String play_url_name = "";
 
@@ -173,9 +137,10 @@ public class Kunyu77 extends Spider {
 
                 }
             }
+            System.out.println(playfrom_Map);
             String vod_play_url = "";
             String vod_play_from = "";
-
+            // vod_play_from=TextUtils.join("$$$",playfrom_Map.keySet());
             int i = 0;
             for (String str : playfrom_Map.keySet()) {
                 if (i < playfrom_Map.size() - 1) {
@@ -187,32 +152,14 @@ public class Kunyu77 extends Spider {
                 i++;
 
             }
-            int j = 0;
+            System.out.println(vod_play_from);
+            ArrayList<String> u = new ArrayList<String>();
             for (ArrayList<String> array : playfrom_Map.values()) {
-                if (j < playfrom_Map.size() - 1) {
-                    for (int k = 0; k < array.size(); k++) {
-                        if (k < array.size() - 1) {
-                            vod_play_url = vod_play_url + array.get(k) + "#";
-                        } else {
-                            vod_play_url = vod_play_url + array.get(k) + "$$$";
-
-                        }
-                    }
-                } else {
-                    for (int k = 0; k < array.size(); k++) {
-                        if (k < array.size() - 1) {
-                            vod_play_url = vod_play_url + array.get(k) + "#";
-                        } else {
-                            vod_play_url = vod_play_url + array.get(k);
-
-                        }
-                    }
-
-                }
-                j++;
-
+                String a = TextUtils.join("#", array);
+                u.add(a);
             }
-
+            vod_play_url = TextUtils.join("$$$", u);
+            // System.out.println(u);
             info.put("vod_play_from", vod_play_from);
             info.put("vod_play_url", vod_play_url);
 
@@ -220,9 +167,9 @@ public class Kunyu77 extends Spider {
             result.put("list", list);
 
             return result.toString();
-
         } catch (Exception e) {
-            SpiderDebug.log(e);
+            e.printStackTrace();
+
         }
         return "";
     }
@@ -251,7 +198,7 @@ public class Kunyu77 extends Spider {
             stringBuilder.append("android7.1.202.0.4");
             stringBuilder.append(t);
             stringBuilder.append("XSpeUFjJ");
-            String res = OkHttpUtil.string(str1, getHeaders(t, stringBuilder.toString()));
+            String res = OkHttpUtil.string(str1, getHeaders());
             JSONObject jsonres = new JSONObject(res);
             JSONArray arrayres = jsonres.getJSONArray("data");
             for (int i = 0; i < arrayres.length(); i++) {
